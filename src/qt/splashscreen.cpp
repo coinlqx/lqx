@@ -30,7 +30,6 @@
 SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle) :
     QWidget(0, f), curAlignment(0)
 {
-
     // transparent background
     setAttribute(Qt::WA_TranslucentBackground);
     setStyleSheet("background:transparent;");
@@ -38,94 +37,67 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle) 
     // no window decorations
     setWindowFlags(Qt::FramelessWindowHint);
 
-    // Geometries of splashscreen
-    int width = 380;
-    int height = 460;
-    int logoWidth = 270;
-    int logoHeight = 270;
-
     // set reference point, paddings
-    int paddingTop = 10;
-    int titleVersionVSpace = 25;
+    int paddingLeft             = 14;
+    int paddingTop              = 470;
+    int titleVersionVSpace      = 17;
+    int titleCopyrightVSpace    = 22;
 
     float fontFactor            = 1.0;
-    float scale = qApp->devicePixelRatio();
 
     // define text to place
     QString titleText       = tr(PACKAGE_NAME);
-    QString versionText = QString::fromStdString(FormatFullVersion()).remove(0, 1);
+    QString versionText     = QString(tr("Version %1")).arg(QString::fromStdString(FormatFullVersion()));
+    QString copyrightText   = QString::fromUtf8(CopyrightHolders("\xc2\xA9", 2014, COPYRIGHT_YEAR).c_str());
     QString titleAddText    = networkStyle->getTitleAddText();
 
-    QFont fontNormal = GUIUtil::getFontNormal();
-    QFont fontBold = GUIUtil::getFontBold();
+    QString font = QApplication::font().toString();
 
-    QPixmap pixmapLogo = networkStyle->getSplashImage();
-    pixmapLogo.setDevicePixelRatio(scale);
-
-    // Adjust logo color based on the current theme
-    QImage imgLogo = pixmapLogo.toImage().convertToFormat(QImage::Format_ARGB32);
-    QColor logoColor = GUIUtil::getThemedQColor(GUIUtil::ThemedColor::BLUE);
-    for (int x = 0; x < imgLogo.width(); ++x) {
-        for (int y = 0; y < imgLogo.height(); ++y) {
-            const QRgb rgb = imgLogo.pixel(x, y);
-            imgLogo.setPixel(x, y, qRgba(logoColor.red(), logoColor.green(), logoColor.blue(), qAlpha(rgb)));
-        }
-    }
-    pixmapLogo.convertFromImage(imgLogo);
-
-    pixmap = QPixmap(width * scale, height * scale);
-    pixmap.setDevicePixelRatio(scale);
-    pixmap.fill(GUIUtil::getThemedQColor(GUIUtil::ThemedColor::BORDER_WIDGET));
+    // load the bitmap for writing some text over it
+    pixmap = networkStyle->getSplashImage();
 
     QPainter pixPaint(&pixmap);
-
-    QRect rect = QRect(1, 1, width - 2, height - 2);
-    pixPaint.fillRect(rect, GUIUtil::getThemedQColor(GUIUtil::ThemedColor::BACKGROUND_WIDGET));
-
-    pixPaint.drawPixmap((width / 2) - (logoWidth / 2), (height / 2) - (logoHeight / 2) + 20, pixmapLogo.scaled(logoWidth * scale, logoHeight * scale, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    pixPaint.setPen(GUIUtil::getThemedQColor(GUIUtil::ThemedColor::DEFAULT));
+    pixPaint.setPen(QColor(100,100,100));
 
     // check font size and drawing with
-    fontBold.setPointSize(50 * fontFactor);
-    pixPaint.setFont(fontBold);
+    pixPaint.setFont(QFont(font, 28*fontFactor));
     QFontMetrics fm = pixPaint.fontMetrics();
     int titleTextWidth = fm.width(titleText);
-    if (titleTextWidth > width * 0.8) {
+    if (titleTextWidth > 160) {
         fontFactor = 0.75;
     }
 
-    fontBold.setPointSize(50 * fontFactor);
-    pixPaint.setFont(fontBold);
+    pixPaint.setFont(QFont(font, 28*fontFactor));
     fm = pixPaint.fontMetrics();
     titleTextWidth  = fm.width(titleText);
-    int titleTextHeight = fm.height();
-    pixPaint.drawText((width / 2) - (titleTextWidth / 2), titleTextHeight + paddingTop, titleText);
+    pixPaint.drawText(paddingLeft,paddingTop,titleText);
 
-    fontNormal.setPointSize(16 * fontFactor);
-    pixPaint.setFont(fontNormal);
-    fm = pixPaint.fontMetrics();
-    int versionTextWidth = fm.width(versionText);
-    pixPaint.drawText((width / 2) - (versionTextWidth / 2), titleTextHeight + paddingTop + titleVersionVSpace, versionText);
+    pixPaint.setFont(QFont(font, 15*fontFactor));
+    pixPaint.drawText(paddingLeft,paddingTop+titleVersionVSpace,versionText);
+
+    // draw copyright stuff
+    {
+        pixPaint.setFont(QFont(font, 10*fontFactor));
+        const int x = paddingLeft;
+        const int y = paddingTop+titleCopyrightVSpace;
+        QRect copyrightRect(x, y, pixmap.width() - x, pixmap.height() - y);
+        pixPaint.drawText(copyrightRect, Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap, copyrightText);
+    }
 
     // draw additional text if special network
     if(!titleAddText.isEmpty()) {
-        fontBold.setPointSize(10 * fontFactor);
-        pixPaint.setFont(fontBold);
+        QFont boldFont = QFont(font, 10*fontFactor);
+        boldFont.setWeight(QFont::Bold);
+        pixPaint.setFont(boldFont);
         fm = pixPaint.fontMetrics();
-        int titleAddTextWidth = fm.width(titleAddText);
-        // Draw the badge backround with the network-specific color
-        QRect badgeRect = QRect(width - titleAddTextWidth - 20, 5, width, fm.height() + 10);
-        QColor badgeColor = networkStyle->getBadgeColor();
-        pixPaint.fillRect(badgeRect, badgeColor);
-        // Draw the text itself using white color, regardless of the current theme
-        pixPaint.setPen(QColor(255, 255, 255));
-        pixPaint.drawText(width - titleAddTextWidth - 10, paddingTop + 10, titleAddText);
+        int titleAddTextWidth  = fm.width(titleAddText);
+        pixPaint.drawText(pixmap.width()-titleAddTextWidth-10,pixmap.height()-25,titleAddText);
     }
 
     pixPaint.end();
 
     // Resize window and move to center of desktop, disallow resizing
-    QRect r(QPoint(), QSize(width, height));
+    QRect r(QPoint(), pixmap.size());
     resize(r.size());
     setFixedSize(r.size());
     move(QApplication::desktop()->screenGeometry().center() - r.center());
@@ -211,10 +183,6 @@ void SplashScreen::unsubscribeFromCoreSignals()
 
 void SplashScreen::showMessage(const QString &message, int alignment, const QColor &color)
 {
-    curMessage = message;
-    curAlignment = alignment;
-    curColor = color;
-    update();
 }
 
 void SplashScreen::paintEvent(QPaintEvent *event)

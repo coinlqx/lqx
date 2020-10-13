@@ -393,7 +393,7 @@ void BitcoinGUI::createActions()
 
     sendCoinsAction = new QToolButton(this);
     sendCoinsAction->setText(tr("&Send"));
-    sendCoinsAction->setStatusTip(tr("Send coins to a Dash address"));
+    sendCoinsAction->setStatusTip(tr("Send coins to a LQX address"));
     sendCoinsAction->setToolTip(sendCoinsAction->statusTip());
     sendCoinsAction->setCheckable(true);
     tabGroup->addButton(sendCoinsAction);
@@ -404,7 +404,7 @@ void BitcoinGUI::createActions()
 
     privateSendCoinsAction = new QToolButton(this);
     privateSendCoinsAction->setText("&PrivateSend");
-    privateSendCoinsAction->setStatusTip(tr("PrivateSend coins to a Dash address"));
+    privateSendCoinsAction->setStatusTip(tr("PrivateSend coins to a LQX address"));
     privateSendCoinsAction->setToolTip(privateSendCoinsAction->statusTip());
     privateSendCoinsAction->setCheckable(true);
     tabGroup->addButton(privateSendCoinsAction);
@@ -1104,7 +1104,7 @@ void BitcoinGUI::updateNetworkState()
     fNetworkActivePrev = fNetworkActive;
 
     if (fNetworkActive) {
-        labelConnectionsIcon->setToolTip(tr("%n active connection(s) to Dash network", "", count));
+        labelConnectionsIcon->setToolTip(tr("%n active connection(s) to LQX network", "", count));
     } else {
         labelConnectionsIcon->setToolTip(tr("Network activity disabled"));
         icon = "connect_4";
