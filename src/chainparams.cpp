@@ -228,8 +228,8 @@ static Consensus::LLMQParams llmq400_60 = {
         .type = Consensus::LLMQ_400_60,
         .name = "llmq_400_60",
         .size = 400,
-        .minSize = 300,
-        .threshold = 240,
+        .minSize = 40,
+        .threshold = 30,
 
         .dkgInterval = 24 * 12, // one DKG every 12 hours
         .dkgPhaseBlocks = 4,
