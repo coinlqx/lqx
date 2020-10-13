@@ -333,7 +333,7 @@ bool CMasternodePayments::GetBlockTxOuts(int nBlockHeight, CAmount blockReward, 
     }
     uint256 proTxHash;
 
-    CAmount masternodeReward = GetMasternodePayment(nBlockHeight, blockReward, nReallocActivationHeight);
+    CAmount masternodeReward = GetMasternodePayment(nBlockHeight, blockReward/*,nReallocActivationHeight*/);
 
     auto dmnPayee = deterministicMNManager->GetListForBlock(pindex).GetMNPayee();
     if (!dmnPayee) {

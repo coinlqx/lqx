@@ -101,8 +101,8 @@ bool fDisableGovernance = false;
 */
 int nWalletBackups = 10;
 
-const char * const BITCOIN_CONF_FILENAME = "dash.conf";
-const char * const BITCOIN_PID_FILENAME = "dashd.pid";
+const char * const BITCOIN_CONF_FILENAME = "lqx.conf";
+const char * const BITCOIN_PID_FILENAME = "lqxd.pid";
 const char * const DEFAULT_DEBUGLOGFILE = "debug.log";
 
 ArgsManager gArgs;
@@ -900,10 +900,10 @@ fs::path GetDefaultDataDir()
     // Windows < Vista: C:\Documents and Settings\Username\Application Data\DashCore
     // Windows >= Vista: C:\Users\Username\AppData\Roaming\DashCore
     // Mac: ~/Library/Application Support/DashCore
-    // Unix: ~/.dashcore
+    // Unix: ~/.lqxcore
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "DashCore";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "LqxCore";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -913,10 +913,10 @@ fs::path GetDefaultDataDir()
         pathRet = fs::path(pszHome);
 #ifdef MAC_OSX
     // Mac
-    return pathRet / "Library/Application Support/DashCore";
+    return pathRet / "Library/Application Support/LqxCore";
 #else
     // Unix
-    return pathRet / ".dashcore";
+    return pathRet / ".lqxcore";
 #endif
 #endif
 }

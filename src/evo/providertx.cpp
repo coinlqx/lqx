@@ -138,7 +138,7 @@ bool CheckProRegTx(const CTransaction& tx, const CBlockIndex* pindexPrev, CValid
 
     if (!ptx.collateralOutpoint.hash.IsNull()) {
         Coin coin;
-        if (!GetUTXOCoin(ptx.collateralOutpoint, coin) || coin.out.nValue != 1000 * COIN) {
+        if (!GetUTXOCoin(ptx.collateralOutpoint, coin) || !isCollateralValidNow(pindexPrev, coin.out.nValue)) {
             return state.DoS(10, false, REJECT_INVALID, "bad-protx-collateral");
         }
 
@@ -158,7 +158,8 @@ bool CheckProRegTx(const CTransaction& tx, const CBlockIndex* pindexPrev, CValid
         if (ptx.collateralOutpoint.n >= tx.vout.size()) {
             return state.DoS(10, false, REJECT_INVALID, "bad-protx-collateral-index");
         }
-        if (tx.vout[ptx.collateralOutpoint.n].nValue != 1000 * COIN) {
+
+        if (!isCollateralValidNow(pindexPrev, tx.vout[ptx.collateralOutpoint.n].nValue)) {
             return state.DoS(10, false, REJECT_INVALID, "bad-protx-collateral");
         }
 
@@ -188,11 +189,11 @@ bool CheckProRegTx(const CTransaction& tx, const CBlockIndex* pindexPrev, CValid
             return state.DoS(10, false, REJECT_DUPLICATE, "bad-protx-dup-key");
         }
 
-        if (!deterministicMNManager->IsDIP3Enforced(pindexPrev->nHeight)) {
-            if (ptx.keyIDOwner != ptx.keyIDVoting) {
-                return state.DoS(10, false, REJECT_INVALID, "bad-protx-key-not-same");
-            }
-        }
+//      if (!deterministicMNManager->IsDIP3Enforced(pindexPrev->nHeight)) {
+//          if (ptx.keyIDOwner != ptx.keyIDVoting) {
+//              return state.DoS(10, false, REJECT_INVALID, "bad-protx-key-not-same");
+//          }
+//      }
     }
 
     if (!CheckInputsHash(tx, ptx, state)) {
@@ -336,11 +337,11 @@ bool CheckProUpRegTx(const CTransaction& tx, const CBlockIndex* pindexPrev, CVal
             }
         }
 
-        if (!deterministicMNManager->IsDIP3Enforced(pindexPrev->nHeight)) {
-            if (dmn->pdmnState->keyIDOwner != ptx.keyIDVoting) {
-                return state.DoS(10, false, REJECT_INVALID, "bad-protx-key-not-same");
-            }
-        }
+//      if (!deterministicMNManager->IsDIP3Enforced(pindexPrev->nHeight)) {
+//          if (dmn->pdmnState->keyIDOwner != ptx.keyIDVoting) {
+//              return state.DoS(10, false, REJECT_INVALID, "bad-protx-key-not-same");
+//          }
+//      }
 
         if (!CheckInputsHash(tx, ptx, state)) {
             // pass the state returned by the function above
