@@ -2119,6 +2119,14 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             vRecv >> LIMITED_STRING(strSubVer, MAX_SUBVERSION_LENGTH);
             cleanSubVer = SanitizeString(strSubVer);
         }
+
+        // disconnect from old versions
+        if (cleanSubVer == "/LQX Core:0.15.1/") {
+            LogPrintf("%s - Disconnecting from obselete version (peer: %d)\n", __func__, pfrom->GetId());
+            pfrom->fDisconnect = true;
+            return true;
+        }
+
         if (!vRecv.empty()) {
             vRecv >> nStartingHeight;
         }
