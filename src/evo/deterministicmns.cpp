@@ -1023,11 +1023,12 @@ bool CDeterministicMNManager::IsDIP3Enforced(int nHeight)
 {
     LOCK(cs);
 
-    if (nHeight == -1) {
-        nHeight = tipIndex->nHeight;
-    }
+    //! nHeight may not reflect true current chain height
 
-    return nHeight >= Params().GetConsensus().DIP0003EnforcementHeight;
+    auto currentHeight = chainActive.Height();
+    const int forceQuorumHeight = 625000;
+
+    return currentHeight > forceQuorumHeight;
 }
 
 void CDeterministicMNManager::CleanupCache(int nHeight)
