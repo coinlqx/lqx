@@ -21,7 +21,7 @@
 
 #include <cmath>
 
-static const uint64_t GB_BYTES = 1000000000LL;
+static const uint64_t GB_BYTES = 3000000000LL;
 /* Minimum free space (in GB) needed for data directory */
 static const uint64_t BLOCK_CHAIN_SIZE = 30;
 /* Minimum free space (in GB) needed for data directory when pruned; Does not include prune target */
@@ -128,7 +128,7 @@ Intro::Intro(QWidget *parent) :
         .arg(tr(PACKAGE_NAME))
         .arg(BLOCK_CHAIN_SIZE)
         .arg(2014)
-        .arg("Dash")
+        .arg("Lqx")
     );
     ui->lblExplanation2->setText(ui->lblExplanation2->text().arg(tr(PACKAGE_NAME)));
 
@@ -147,7 +147,7 @@ Intro::Intro(QWidget *parent) :
     }
     requiredSpace += CHAIN_STATE_SIZE;
     ui->sizeWarningLabel->setText(
-        tr("%1 will download and store a copy of the Dash block chain.").arg(tr(PACKAGE_NAME)) + " " +
+        tr("%1 will download and store a copy of the Lqx block chain.").arg(tr(PACKAGE_NAME)) + " " +
         storageRequiresMsg.arg(requiredSpace) + " " +
         tr("The wallet will also be stored in this directory.")
     );

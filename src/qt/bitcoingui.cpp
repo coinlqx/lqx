@@ -415,7 +415,7 @@ void BitcoinGUI::createActions()
 
     receiveCoinsAction = new QToolButton(this);
     receiveCoinsAction->setText(tr("&Receive"));
-    receiveCoinsAction->setStatusTip(tr("Request payments (generates QR codes and dash: URIs)"));
+    receiveCoinsAction->setStatusTip(tr("Request payments (generates QR codes and lqx: URIs)"));
     receiveCoinsAction->setToolTip(receiveCoinsAction->statusTip());
     receiveCoinsAction->setCheckable(true);
     tabGroup->addButton(receiveCoinsAction);
@@ -477,7 +477,7 @@ void BitcoinGUI::createActions()
     quitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
     quitAction->setMenuRole(QAction::QuitRole);
     aboutAction = new QAction(tr("&About %1").arg(tr(PACKAGE_NAME)), this);
-    aboutAction->setStatusTip(tr("Show information about Dash Core"));
+    aboutAction->setStatusTip(tr("Show information about Lqx Core"));
     aboutAction->setMenuRole(QAction::AboutRole);
     aboutAction->setEnabled(false);
     aboutQtAction = new QAction(tr("About &Qt"), this);
@@ -501,9 +501,9 @@ void BitcoinGUI::createActions()
     unlockWalletAction->setToolTip(tr("Unlock wallet"));
     lockWalletAction = new QAction(tr("&Lock Wallet"), this);
     signMessageAction = new QAction(tr("Sign &message..."), this);
-    signMessageAction->setStatusTip(tr("Sign messages with your Dash addresses to prove you own them"));
+    signMessageAction->setStatusTip(tr("Sign messages with your Lqx addresses to prove you own them"));
     verifyMessageAction = new QAction(tr("&Verify message..."), this);
-    verifyMessageAction->setStatusTip(tr("Verify messages to ensure they were signed with specified Dash addresses"));
+    verifyMessageAction->setStatusTip(tr("Verify messages to ensure they were signed with specified Lqx addresses"));
 
     openInfoAction = new QAction(tr("&Information"), this);
     openInfoAction->setStatusTip(tr("Show diagnostic information"));
@@ -534,11 +534,11 @@ void BitcoinGUI::createActions()
     usedReceivingAddressesAction->setStatusTip(tr("Show the list of used receiving addresses and labels"));
 
     openAction = new QAction(tr("Open &URI..."), this);
-    openAction->setStatusTip(tr("Open a dash: URI or payment request"));
+    openAction->setStatusTip(tr("Open a lqx: URI or payment request"));
 
     showHelpMessageAction = new QAction(tr("&Command-line options"), this);
     showHelpMessageAction->setMenuRole(QAction::NoRole);
-    showHelpMessageAction->setStatusTip(tr("Show the %1 help message to get a list with possible Dash command-line options").arg(tr(PACKAGE_NAME)));
+    showHelpMessageAction->setStatusTip(tr("Show the %1 help message to get a list with possible Lqx command-line options").arg(tr(PACKAGE_NAME)));
 
     showPrivateSendHelpAction = new QAction(tr("&PrivateSend information"), this);
     showPrivateSendHelpAction->setMenuRole(QAction::NoRole);
@@ -1380,7 +1380,7 @@ void BitcoinGUI::setAdditionalDataSyncProgress(double nSyncProgress)
 
 void BitcoinGUI::message(const QString &title, const QString &message, unsigned int style, bool *ret)
 {
-    QString strTitle = tr("Dash Core"); // default title
+    QString strTitle = tr("Lqx Core"); // default title
     // Default to information icon
     int nMBoxIcon = QMessageBox::Information;
     int nNotifyIcon = Notificator::Information;

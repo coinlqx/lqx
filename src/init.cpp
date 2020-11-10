@@ -237,7 +237,7 @@ void PrepareShutdown()
     /// for example if the data directory was found to be locked.
     /// Be sure that anything that writes files or flushes caches only does this if the respective
     /// module was initialized.
-    RenameThread("dash-shutoff");
+    RenameThread("lqx-shutoff");
     mempool.AddTransactionsUpdated(1);
     StopHTTPRPC();
     StopREST();
@@ -551,7 +551,7 @@ std::string HelpMessage(HelpMessageMode mode)
 
     strUsage += g_wallet_init_interface->GetHelpString(showDebug);
     if (mode == HMM_BITCOIN_QT)
-        strUsage += HelpMessageOpt("-windowtitle=<name>", _("Sets a window title which is appended to \"Dash Core - \""));
+        strUsage += HelpMessageOpt("-windowtitle=<name>", _("Sets a window title which is appended to \"Lqx Core - \""));
 
 #if ENABLE_ZMQ
     strUsage += HelpMessageGroup(_("ZeroMQ notification options:"));
@@ -617,7 +617,7 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-shrinkdebugfile", _("Shrink debug.log file on client startup (default: 1 when no -debug)"));
     AppendParamsHelpMessages(strUsage, showDebug);
     strUsage += HelpMessageOpt("-disablegovernance", strprintf(_("Disable governance validation (0-1, default: %u)"), 0));
-    strUsage += HelpMessageOpt("-sporkaddr=<dashaddress>", strprintf(_("Override spork address. Only useful for regtest and devnet. Using this on mainnet or testnet will ban you.")));
+    strUsage += HelpMessageOpt("-sporkaddr=<lqxaddress>", strprintf(_("Override spork address. Only useful for regtest and devnet. Using this on mainnet or testnet will ban you.")));
     strUsage += HelpMessageOpt("-minsporkkeys=<n>", strprintf(_("Overrides minimum spork signers to change spork value. Only useful for regtest and devnet. Using this on mainnet or testnet will ban you.")));
 
     strUsage += HelpMessageGroup(_("Masternode options:"));
@@ -773,7 +773,7 @@ void CleanupBlockRevFiles()
 void ThreadImport(std::vector<fs::path> vImportFiles)
 {
     const CChainParams& chainparams = Params();
-    RenameThread("dash-loadblk");
+    RenameThread("lqx-loadblk");
 
     {
     CImportingNow imp;
