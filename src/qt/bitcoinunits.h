@@ -60,7 +60,7 @@ public:
         LQX,
         mLQX,
         uLQX,
-        duffs
+        Chasthons
     };
 
     enum SeparatorStyle
