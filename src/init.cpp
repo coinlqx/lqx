@@ -668,7 +668,7 @@ std::string HelpMessage(HelpMessageMode mode)
 
 std::string LicenseInfo()
 {
-    const std::string URL_SOURCE_CODE = "<https://github.com/coinlqx/lqx.git>";
+    const std::string URL_SOURCE_CODE = "<https://github.com/coinlqx/lqx>";
     const std::string URL_WEBSITE = "<https://lqxcoin.com/>";
 
     return CopyrightHolders(_("Copyright (C)"), 2019, COPYRIGHT_YEAR) + "\n" +

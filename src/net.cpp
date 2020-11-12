@@ -2003,7 +2003,7 @@ void ThreadMapPort()
             }
         }
 
-        std::string strDesc = "Dash Core " + FormatFullVersion();
+        std::string strDesc = "Lqx Core " + FormatFullVersion();
 
         try {
             while (true) {
