@@ -22,7 +22,7 @@ QList<BitcoinUnits::Unit> BitcoinUnits::availableUnits()
     unitlist.append(LQX);
     unitlist.append(mLQX);
     unitlist.append(uLQX);
-    unitlist.append(duffs);
+    unitlist.append(Chasthons);
     return unitlist;
 }
 
@@ -33,7 +33,7 @@ bool BitcoinUnits::valid(int unit)
     case LQX:
     case mLQX:
     case uLQX:
-    case duffs:
+    case Chasthons:
         return true;
     default:
         return false;
@@ -49,7 +49,7 @@ QString BitcoinUnits::name(int unit)
             case LQX: return QString("LQX");
             case mLQX: return QString("mLQX");
             case uLQX: return QString::fromUtf8("μLQX");
-            case duffs: return QString("duffs");
+            case Chasthons: return QString("Chasthons");
             default: return QString("???");
         }
     }
@@ -60,7 +60,7 @@ QString BitcoinUnits::name(int unit)
             case LQX: return QString("tLQX");
             case mLQX: return QString("mtLQX");
             case uLQX: return QString::fromUtf8("μtLQX");
-            case duffs: return QString("tduffs");
+            case Chasthons: return QString("tChasthons");
             default: return QString("???");
         }
     }
@@ -72,10 +72,10 @@ QString BitcoinUnits::description(int unit)
     {
         switch(unit)
         {
-            case LQX: return QString("Dash");
-            case mLQX: return QString("Milli-Dash (1 / 1" THIN_SP_UTF8 "000)");
-            case uLQX: return QString("Micro-Dash (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
-            case duffs: return QString("Ten Nano-Dash (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+            case LQX: return QString("Lqx");
+            case mLQX: return QString("Milli-Lqx (1 / 1" THIN_SP_UTF8 "000)");
+            case uLQX: return QString("Micro-Lqx (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+            case Chasthons: return QString("Ten Nano-Dash (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
             default: return QString("???");
         }
     }
@@ -86,7 +86,7 @@ QString BitcoinUnits::description(int unit)
             case LQX: return QString("TestDashs");
             case mLQX: return QString("Milli-TestDash (1 / 1" THIN_SP_UTF8 "000)");
             case uLQX: return QString("Micro-TestDash (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
-            case duffs: return QString("Ten Nano-TestDash (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+            case Chasthons: return QString("Ten Nano-TestDash (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
             default: return QString("???");
         }
     }
@@ -99,7 +99,7 @@ qint64 BitcoinUnits::factor(int unit)
     case LQX:  return 100000000;
     case mLQX: return 100000;
     case uLQX: return 100;
-    case duffs: return 1;
+    case Chasthons: return 1;
     default:   return 100000000;
     }
 }
@@ -111,7 +111,7 @@ int BitcoinUnits::decimals(int unit)
     case LQX: return 8;
     case mLQX: return 5;
     case uLQX: return 2;
-    case duffs: return 0;
+    case Chasthons: return 0;
     default: return 0;
     }
 }
