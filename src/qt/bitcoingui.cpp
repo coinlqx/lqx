@@ -1406,7 +1406,7 @@ void BitcoinGUI::message(const QString &title, const QString &message, unsigned 
             break;
         }
     }
-    // Append title to "Dash Core - "
+    // Append title to "LQX Core - "
     if (!msgType.isEmpty())
         strTitle += " - " + msgType;
 
