@@ -1107,6 +1107,25 @@ NOTE:   unlike bitcoin we are using PREVIOUS block height here,
 */
 CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params& consensusParams, bool fSuperblockPartOnly)
 {
+    if (nPrevHeight + 1 > consensusParams.nNewPaymentSchemaHeight)
+    {
+        CAmount baseSubsidy = 5 * COIN;
+
+        //! calculate 1% drop each 411,900 blocks
+        int sinceNewPayment = consensusParams.nNewPaymentSchemaHeight - nPrevHeight;
+        int periodPassed = sinceNewPayment;
+        while (periodPassed > 0) {
+           baseSubsidy *= 0.99;
+           periodPassed -= consensusParams.nSubsidyHalvingInterval;
+        }
+
+        //! 20% per block/governance
+        if (fSuperblockPartOnly)
+            return baseSubsidy * 0.2;
+
+        return baseSubsidy;
+    }
+
     double dDiff;
     CAmount nSubsidyBase;
     CAmount nSubsidy = 127 * COIN;

@@ -312,6 +312,7 @@ public:
         consensus.nPowDGWHeight = 20;
         consensus.nRuleChangeActivationThreshold = 1368; // 95% of 2016
         consensus.nMinerConfirmationWindow = 1440; // nPowTargetTimespan / nPowTargetSpacing
+        consensus.nNewPaymentSchemaHeight = 750000;
 
         consensus.nMasternodeCollateral = 10000 * COIN; //! masternode collateral
         consensus.nIncorrectEvoConsensus = 605000;      //! allow for incorrect evo consensus before this height
