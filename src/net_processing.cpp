@@ -2126,8 +2126,14 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             pfrom->fDisconnect = true;
             return true;
         }
-
-        if (!vRecv.empty()) {
+        
+	if (cleanSubVer == "/LQX Core:0.16.0.1/" || cleanSubVer == "/LQX Core:0.16.0.2/") {
+            //LogPrintf("%s - Disconnecting from obselete version (peer: %d)\n", __func__, pfrom->GetId());
+            pfrom->fDisconnect = true;
+            return true;
+        }
+        
+	if (!vRecv.empty()) {
             vRecv >> nStartingHeight;
         }
         if (!vRecv.empty())
