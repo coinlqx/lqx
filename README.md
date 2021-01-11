@@ -1,4 +1,4 @@
-LQX Core staging tree 0.16
+LQX Core staging tree 0.16.0.3
 ==========================
 
 `master:` [![Build Status](https://travis-ci.org/coinlqx/lqx.svg?branch=master)](https://travis-ci.org/coinlqx/lqx) `develop:` [![Build Status](https://travis-ci.org/coinlqx/lqx.svg?branch=develop)](https://travis-ci.org/coinlqx/lqx/branches)
