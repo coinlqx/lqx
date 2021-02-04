@@ -5,6 +5,8 @@
 #include <base58.h>
 
 #include <hash.h>
+#include <random.h>
+#include <openssl/sha.h>
 #include <uint256.h>
 
 #include <assert.h>
@@ -147,6 +149,33 @@ bool DecodeBase58Check(const char* psz, std::vector<unsigned char>& vchRet)
 bool DecodeBase58Check(const std::string& str, std::vector<unsigned char>& vchRet)
 {
     return DecodeBase58Check(str.c_str(), vchRet);
+}
+
+void generateBurnAddress(std::string& burnAddress)
+{
+    //! define version prefix
+    std::string generatedAddress = "L";
+
+    //! generate random mostly repeating b58 string
+    char burnByte[2];
+    while (generatedAddress.size() < 34) {
+        burnByte[0] = pszBase58[GetRandInt(58)];
+        burnByte[1] = '\0';
+        for (int i = 0; i < (15 + GetRandInt(13)); i++) {
+            generatedAddress += burnByte;
+        }
+    }
+
+    //! truncate, calc checksum, test validity
+    unsigned char midstate[32];
+    generatedAddress.resize(34);
+    std::vector<unsigned char> rawAddress;
+    DecodeBase58(generatedAddress.c_str(), rawAddress);
+    SHA256(rawAddress.data(), 21, midstate);
+    SHA256(midstate, 32, midstate);
+    memcpy(rawAddress.data() + 21, midstate, 4);
+    std::string outputAddress = EncodeBase58(rawAddress.data(), rawAddress.data() + 25);
+    burnAddress = outputAddress;
 }
 
 CBase58Data::CBase58Data()
