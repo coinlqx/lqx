@@ -1136,6 +1136,9 @@ CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params&
     } else {
         dDiff = ConvertBitsToDouble(nPrevBits);
     }
+
+    // 2) note the following is still used for historic validation, so must remain in place
+    ///////////////////////////////////////////////////////////////////////////////////////////////
     if (nPrevHeight > 945) {
         if (nPrevHeight > consensusParams.nSubsidyHalvingInterval) {
             nSubsidyBase = (2222222.0 / (pow((dDiff + 2600.0) / 9.0, 2.0)));
@@ -1149,6 +1152,7 @@ CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params&
                 nSubsidy -= nSubsidy/13.333333333; // 7,5% de caimento
             }
         }
+    ///////////////////////////////////////////////////////////////////////////////////////////////
     } else {
         //LogPrintf("height %u diff %4.2f reward %d\n", nPrevHeight, dDiff, nSubsidyBase);
         nSubsidy = 500000 * COIN;
