@@ -79,6 +79,33 @@ UniValue debug(const JSONRPCRequest& request)
     return "Debug mode: " + ListActiveLogCategoriesString();
 }
 
+UniValue currentsupply(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() > 0)
+        throw std::runtime_error(
+            "currentsupply\n"
+            "Display the current supply in LQX.\n"
+        );
+
+    LOCK(cs_main);
+
+    CBlockIndex* pindex = chainActive.Tip();
+    CAmount currentSupply = pindex->nMoneySupply;
+
+    return (currentSupply / COIN);
+}
+
+UniValue maxsupply(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() > 0)
+        throw std::runtime_error(
+            "maxsupply\n"
+            "Display the maximum allowable supply in LQX.\n"
+        );
+
+    return (MAX_SUPPLY / COIN);
+}
+
 UniValue mnsync(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
@@ -1218,6 +1245,8 @@ static const CRPCCommand commands[] =
     { "addressindex",       "getaddressbalance",      &getaddressbalance,      {"addresses"} },
 
     /* Dash features */
+    { "lqx",               "currentsupply",          &currentsupply,          {} },
+    { "lqx",               "maxsupply",              &maxsupply,              {} },
     { "lqx",               "mnsync",                 &mnsync,                 {} },
     { "lqx",               "spork",                  &spork,                  {"arg0","value"} },
 

@@ -249,6 +249,9 @@ CAmount maxTxFee = DEFAULT_TRANSACTION_MAXFEE;
 CBlockPolicyEstimator feeEstimator;
 CTxMemPool mempool(&feeEstimator);
 
+CAmount getCurrentSupply();
+void setCurrentSupply(CAmount supply);
+
 void CheckBlockIndex(const Consensus::Params& consensusParams);
 
 /** Constant stuff for coinbase transactions we create: */
@@ -1107,6 +1110,10 @@ NOTE:   unlike bitcoin we are using PREVIOUS block height here,
 */
 CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params& consensusParams, bool fSuperblockPartOnly)
 {
+    //! enforce supply max of 350mil
+    if (getCurrentSupply() >= MAX_SUPPLY)
+        return 0 * COIN;
+
     if (nPrevHeight + 1 > consensusParams.nNewPaymentSchemaHeight)
     {
         CAmount baseSubsidy = 5 * COIN;
@@ -2092,6 +2099,8 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
 
     std::vector<int> prevheights;
     CAmount nFees = 0;
+    CAmount nValueIn = 0;
+    CAmount nValueOut = 0;
     int nInputs = 0;
     unsigned int nSigOps = 0;
     blockundo.vtxundo.reserve(block.vtx.size() - 1);
@@ -2111,12 +2120,16 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
 
         nInputs += tx.vin.size();
 
-        if (!tx.IsCoinBase())
+        if (tx.IsCoinBase())
+            nValueOut += tx.GetValueOut();
+        else
         {
             CAmount txfee = 0;
             if (!Consensus::CheckTxInputs(tx, state, view, pindex->nHeight, txfee)) {
                 return error("%s: Consensus::CheckTxInputs: %s, %s", __func__, tx.GetHash().ToString(), FormatStateMessage(state));
             }
+            nValueIn += view.GetValueIn(tx);
+            nValueOut += tx.GetValueOut();
             nFees += txfee;
             if (!MoneyRange(nFees)) {
                 return state.DoS(100, error("%s: accumulated fee in the block out of range.", __func__),
@@ -2322,6 +2335,11 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
 
     if (fJustCheck)
         return true;
+
+    // peercoin: track money supply and mint amount info
+    pindex->nMint = nValueOut - nValueIn + nFees;
+    pindex->nMoneySupply = (pindex->pprev? pindex->pprev->nMoneySupply : 0) + nValueOut - nValueIn;
+    setCurrentSupply(pindex->nMoneySupply);
 
     if (!WriteUndoDataForBlock(blockundo, state, pindex, chainparams))
         return false;
@@ -5017,6 +5035,23 @@ bool isCollateralValidNow(const CBlockIndex* pindexPrev, CAmount proCollateral) 
     if (proCollateral == 1000 * COIN && nHeight < 605000) return true;
     if (proCollateral == 10000 * COIN && nHeight >= 600000) return true;
     return false;
+}
+
+int currentHeight() {
+    return chainActive.Height();
+}
+
+//! note; these are here simply to avoid having to bash through several locks
+//!       when getting a rough estimate for current supply at any given time
+CAmount currentSupply{0};
+
+CAmount getCurrentSupply() {
+    return currentSupply;
+}
+
+void setCurrentSupply(CAmount supply) {
+    if (supply > currentSupply)
+        currentSupply = supply;
 }
 
 class CMainCleanup

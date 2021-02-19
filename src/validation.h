@@ -496,4 +496,6 @@ bool LoadMempool();
 
 bool isCollateralValidNow(const CBlockIndex* pindexPrev, CAmount proCollateral);
 
+int currentHeight();
+
 #endif // BITCOIN_VALIDATION_H

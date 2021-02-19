@@ -213,6 +213,10 @@ public:
     uint32_t nBits;
     uint32_t nNonce;
 
+    // supply accounting
+    int64_t nMint;
+    int64_t nMoneySupply;
+
     //! (memory only) Sequential id assigned to distinguish order in which blocks are received.
     int32_t nSequenceId;
 
@@ -240,6 +244,9 @@ public:
         nTime          = 0;
         nBits          = 0;
         nNonce         = 0;
+
+        nMint          = 0;
+        nMoneySupply   = 0;
     }
 
     CBlockIndex()
@@ -410,6 +417,10 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
+
+        // supply accounting
+        READWRITE(nMint);
+        READWRITE(nMoneySupply);
     }
 
     uint256 GetBlockHash() const
