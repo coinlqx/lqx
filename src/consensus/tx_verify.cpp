@@ -8,11 +8,32 @@
 #include <primitives/transaction.h>
 #include <script/interpreter.h>
 #include <consensus/validation.h>
+#include <util.h>
 
 // TODO remove the following dependencies
 #include <chain.h>
 #include <coins.h>
 #include <utilmoneystr.h>
+
+bool bannedInit{false};
+std::vector<std::pair<uint256,int>> bannedAddr;
+
+void initBanned() {
+    if (bannedInit) return;
+    bannedAddr.push_back(std::make_pair(uint256S("f4e994ec1dbdd0f11e2f7e87b4462074631531e173544723ce8379bc59fb3fb3"),0));
+    bannedAddr.push_back(std::make_pair(uint256S("08e7baf21c6a71f9f55f3e15ca99b55cdfaaab9e31a4e7d34fe8fe681aa5a005"),1));
+    bannedAddr.push_back(std::make_pair(uint256S("17468918c22189cbb772d79baea35bafc9f9cf983a34efc9e39b7268f98f8652"),1));
+    bannedAddr.push_back(std::make_pair(uint256S("6270a8a7a9aa5726eb7a907414123b600bc014cb79dd5fecb314cb33f316037a"),1));
+    bannedAddr.push_back(std::make_pair(uint256S("d75912b93576731cfb47be89f54ee1c21aa127aa69e56c1d834b7bac5f4933af"),1));
+    bannedAddr.push_back(std::make_pair(uint256S("3c801c5e5522f0bd65fb23760c3383b19561f7aee4a0e91b8cb623622ae344e4"),1));
+    bannedAddr.push_back(std::make_pair(uint256S("4ccc30c99d71389a3b2705c8ab4887b52b06acd91c048ef8c57a7cb14630a905"),1));
+    bannedAddr.push_back(std::make_pair(uint256S("311b0ac23f439e415397e3231fe938188d0dffb101fdfa96b04208ebd9f0af33"),1));
+    bannedAddr.push_back(std::make_pair(uint256S("839d12245ecd79581a33770421e6272f565d78589e3a7c1c5673e11815b1afa8"),1));
+    bannedAddr.push_back(std::make_pair(uint256S("39281fea7a8e705cd66e99572815a772c9ca1000dc3be6cc60ea0b2afdd1b2b6"),1));
+    bannedAddr.push_back(std::make_pair(uint256S("655bff5a5e8c257f92156531125efef7319b3682676c24bd09f31034c1b8d7d6"),1));
+    bannedAddr.push_back(std::make_pair(uint256S("c0ef56f46b9304ce15e7df38c096bb21605bd030fd0e3c902dad6adf5ffbbfd3"),1));
+    bannedInit = true;
+}
 
 bool IsFinalTx(const CTransaction &tx, int nBlockHeight, int64_t nBlockTime)
 {
@@ -151,6 +172,10 @@ unsigned int GetTransactionSigOpCount(const CTransaction& tx, const CCoinsViewCa
 
 bool CheckTransaction(const CTransaction& tx, CValidationState &state)
 {
+    initBanned();
+
+    bool isBanActive = chainActive.Height() > 800000;
+
     bool allowEmptyTxInOut = false;
     if (tx.nType == TRANSACTION_QUORUM_COMMITMENT) {
         allowEmptyTxInOut = true;
@@ -186,6 +211,15 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state)
     {
         if (!vInOutPoints.insert(txin.prevout).second)
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-duplicate");
+        //! test txin to see if its a known banned address
+        for (const auto& banned : bannedAddr) {
+            if (txin.prevout.hash == banned.first) {
+               if (txin.prevout.n == banned.second) {
+                   if (isBanActive)
+                       return state.DoS(100, false, REJECT_INVALID, "bad-txns-banned-inputs");
+               }
+            }
+        }
     }
 
     if (tx.IsCoinBase())
