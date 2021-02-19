@@ -15,6 +15,7 @@
 #include <coins.h>
 #include <utilmoneystr.h>
 
+int currentHeight();
 bool bannedInit{false};
 std::vector<std::pair<uint256,int>> bannedAddr;
 
@@ -174,7 +175,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state)
 {
     initBanned();
 
-    bool isBanActive = chainActive.Height() > 800000;
+    bool isBanActive = currentHeight() > 800000;
 
     bool allowEmptyTxInOut = false;
     if (tx.nType == TRANSACTION_QUORUM_COMMITMENT) {
