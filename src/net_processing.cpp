@@ -2121,15 +2121,10 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         }
 
         // disconnect from old versions
-        if (cleanSubVer == "/LQX Core:0.15.1/") {
+        if (cleanSubVer != "/LQX Core:0.16.0.5/") {
             LogPrintf("%s - Disconnecting from obselete version (peer: %d)\n", __func__, pfrom->GetId());
-            pfrom->fDisconnect = true;
-            return true;
-        }
-        
-	if (cleanSubVer == "/LQX Core:0.16.0.1/" || cleanSubVer == "/LQX Core:0.16.0.2/") {
-            //LogPrintf("%s - Disconnecting from obselete version (peer: %d)\n", __func__, pfrom->GetId());
-            pfrom->fDisconnect = true;
+            Misbehaving(pfrom->GetId(), 100);
+	    pfrom->fDisconnect = true;
             return true;
         }
         
