@@ -513,6 +513,120 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
     return wtx.GetHash().GetHex();
 }
 
+UniValue burncoins(const JSONRPCRequest& request)
+{
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() < 1 || request.params.size() > 7)
+        throw std::runtime_error(
+            "burncoins amount ( \"comment\" subtractfeefromamount use_is use_ps conf_target \"estimate_mode\")\n"
+            "\nSend an amount to a given address.\n"
+            + HelpRequiringPassphrase(pwallet) +
+            "\nArguments:\n"
+            "1. \"amount\"             (numeric or string, required) The amount in " + CURRENCY_UNIT + " to burn. eg 0.1\n"
+            "2. \"comment\"            (string, optional) A comment embedded in the transaction on the blockchain.\n"
+            "                             This is part of the transaction.\n"
+            "3. subtractfeefromamount  (boolean, optional, default=false) The fee will be deducted from the amount being burned.\n"
+            "                             The amount burned will be fewer coins than you enter in the amount field.\n"
+            "4. \"use_is\"             (bool, optional, default=false) Deprecated and ignored\n"
+            "5. \"use_ps\"             (bool, optional, default=false) Use PrivateSend funds only\n"
+            "6. conf_target            (numeric, optional) Confirmation target (in blocks)\n"
+            "7. \"estimate_mode\"      (string, optional, default=UNSET) The fee estimate mode, must be one of:\n"
+            "       \"UNSET\"\n"
+            "       \"ECONOMICAL\"\n"
+            "       \"CONSERVATIVE\"\n"
+            "\nResult:\n"
+            "\"txid\"                  (string) The transaction id.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("burncoins", "0.1")
+            + HelpExampleCli("burncoins", "0.1 \"Hello world!\"")
+            + HelpExampleCli("burncoins", "0.1 \"\" true")
+            + HelpExampleRpc("burncoins", "0.1, \"Hello world!\"")
+        );
+
+    ObserveSafeMode();
+
+    // Make sure the results are valid at least up to the most recent block
+    // the user could have gotten from another RPC command prior to now
+    pwallet->BlockUntilSyncedToCurrentChain();
+
+    LOCK2(cs_main, mempool.cs);
+    LOCK(pwallet->cs_wallet);
+
+    const CAmount curBalance = pwallet->GetBalance();
+
+    // Amount
+    CAmount nAmount = AmountFromValue(request.params[0]);
+    if (nAmount <= 0)
+        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for burn");
+
+    if (nAmount > curBalance)
+        throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
+
+    // Comment
+    CWalletTx wtx;
+    CScript burnScript = CScript() << OP_RETURN;
+    if (!request.params[1].isNull() && !request.params[1].get_str().empty()) {
+        // We can only support a string of up to 640 characters here instead of 641 (MAX_OP_RETURN_RELAY-3) because an extra length byte is added by OP_PUSHDATA2
+        // However, this does not apply here with MAX_OP_RETURN_RELAY == 83
+        if (request.params[1].get_str().length() > MAX_OP_RETURN_RELAY - 3)
+            throw JSONRPCError(RPC_INVALID_PARAMETER, strprintf("Comment cannot be longer than %u characters", MAX_OP_RETURN_RELAY - 3));
+        burnScript << ToByteVector(request.params[1].get_str());
+    }
+
+    bool fSubtractFeeFromAmount = false;
+    if (!request.params[2].isNull()) {
+        fSubtractFeeFromAmount = request.params[2].get_bool();
+    }
+
+    CCoinControl coin_control;
+
+    if (!request.params[4].isNull()) {
+        coin_control.UsePrivateSend(request.params[4].get_bool());
+    }
+
+    if (!request.params[5].isNull()) {
+        coin_control.m_confirm_target = ParseConfirmTarget(request.params[5]);
+    }
+
+    if (!request.params[6].isNull()) {
+        if (!FeeModeFromString(request.params[6].get_str(), coin_control.m_fee_mode)) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid estimate_mode parameter");
+        }
+    }
+
+    EnsureWalletIsUnlocked(pwallet);
+
+    if (pwallet->GetBroadcastTransactions() && !g_connman) {
+        throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
+    }
+
+    // Create and send the transaction
+    CReserveKey reservekey(pwallet);
+    CAmount nFeeRequired;
+    std::string strError;
+    std::vector<CRecipient> vecSend;
+    int nChangePosRet = -1;
+    CRecipient recipient = {burnScript, nAmount, fSubtractFeeFromAmount};
+    vecSend.push_back(recipient);
+    if (!pwallet->CreateTransaction(vecSend, wtx, reservekey, nFeeRequired, nChangePosRet,
+                                         strError, coin_control)) {
+        if (!fSubtractFeeFromAmount && nAmount + nFeeRequired > curBalance)
+            strError = strprintf("Error: This transaction requires a transaction fee of at least %s", FormatMoney(nFeeRequired));
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+    CValidationState state;
+    if (!pwallet->CommitTransaction(wtx, reservekey, g_connman.get(), state)) {
+        strError = strprintf("Error: The transaction was rejected! Reason given: %s", state.GetRejectReason());
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+
+    return wtx.GetHash().GetHex();
+}
+
 // DEPRECATED
 UniValue instantsendtoaddress(const JSONRPCRequest& request)
 {
@@ -3623,6 +3737,7 @@ static const CRPCCommand commands[] =
     { "wallet",             "sendforburn",              &sendforburn,              {"amount","comment"} },
     { "wallet",             "sendmany",                 &sendmany,                 {"fromaccount","amounts","minconf","addlocked","comment","subtractfeefrom","use_is","use_ps","conf_target","estimate_mode"} },
     { "wallet",             "sendtoaddress",            &sendtoaddress,            {"address","amount","comment","comment_to","subtractfeefromamount","use_is","use_ps","conf_target","estimate_mode"} },
+    { "wallet",             "burncoins",                &burncoins,                {"amount","comment","subtractfeefromamount","use_is","use_ps","conf_target","estimate_mode"} },
     { "wallet",             "setaccount",               &setaccount,               {"address","account"} },
     { "wallet",             "settxfee",                 &settxfee,                 {"amount"} },
     { "wallet",             "setprivatesendrounds",     &setprivatesendrounds,     {"rounds"} },
