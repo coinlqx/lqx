@@ -1163,63 +1163,6 @@ UniValue sendfrom(const JSONRPCRequest& request)
     return wtx.GetHash().GetHex();
 }
 
-UniValue sendforburn(const JSONRPCRequest& request)
-{
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
-        return NullUniValue;
-    }
-
-    if (request.fHelp || request.params.size() < 1 || request.params.size() > 2)
-        throw std::runtime_error(
-            "sendforburn amount ( \"comment\" )\n"
-            "\nBurn a specified amount of Lqx.\n"
-            + HelpRequiringPassphrase(pwallet) +
-            "\nArguments:\n"
-            "1. \"amount\"             (numeric or string, required) The amount in " + CURRENCY_UNIT + " to burn. eg 0.1\n"
-            "2. \"comment\"            (string, optional) A comment used to store the details of the burn transaction. \n"
-            "                                             This is not part of the transaction, just kept in your wallet.\n"
-            "\nResult:\n"
-            "\"txid\"                  (string) The transaction id.\n"
-            "\nExamples:\n"
-            + HelpExampleCli("sendforburn", "100")
-            + HelpExampleCli("sendforburn", "100, \"REASON: stolen from exchange xyz\"")
-        );
-
-    ObserveSafeMode();
-
-    // Make sure the results are valid at least up to the most recent block
-    // the user could have gotten from another RPC command prior to now
-    pwallet->BlockUntilSyncedToCurrentChain();
-
-    LOCK2(cs_main, mempool.cs);
-    LOCK(pwallet->cs_wallet);
-
-    // Amount
-    CAmount nAmount = AmountFromValue(request.params[0]);
-    if (nAmount <= 0)
-        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for burn");
-
-    // Wallet comments
-    CWalletTx wtx;
-    if (!request.params[1].isNull() && !request.params[1].get_str().empty())
-        wtx.mapValue["comment"] = request.params[1].get_str();
-
-    CCoinControl coin_control;
-
-    EnsureWalletIsUnlocked(pwallet);
-
-    //! cycle just in case
-    std::string burnAddress;
-    while (!IsValidDestination(DecodeDestination(burnAddress))) {
-       generateBurnAddress(burnAddress);
-    }
-    CTxDestination dest = DecodeDestination(burnAddress);
-
-    SendMoney(pwallet, dest, nAmount, true, wtx, coin_control);
-
-    return wtx.GetHash().GetHex();
-}
 
 UniValue sendmany(const JSONRPCRequest& request)
 {
@@ -3734,7 +3677,6 @@ static const CRPCCommand commands[] =
     { "wallet",             "lockunspent",              &lockunspent,              {"unlock","transactions"} },
     { "wallet",             "move",                     &movecmd,                  {"fromaccount","toaccount","amount","minconf","comment"} },
     { "wallet",             "sendfrom",                 &sendfrom,                 {"fromaccount","toaddress","amount","minconf","addlocked","comment","comment_to"} },
-    { "wallet",             "sendforburn",              &sendforburn,              {"amount","comment"} },
     { "wallet",             "sendmany",                 &sendmany,                 {"fromaccount","amounts","minconf","addlocked","comment","subtractfeefrom","use_is","use_ps","conf_target","estimate_mode"} },
     { "wallet",             "sendtoaddress",            &sendtoaddress,            {"address","amount","comment","comment_to","subtractfeefromamount","use_is","use_ps","conf_target","estimate_mode"} },
     { "wallet",             "burncoins",                &burncoins,                {"amount","comment","subtractfeefromamount","use_is","use_ps","conf_target","estimate_mode"} },
