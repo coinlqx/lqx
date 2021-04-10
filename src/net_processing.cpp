@@ -2120,14 +2120,18 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             cleanSubVer = SanitizeString(strSubVer);
         }
 
-        // disconnect from old versions
-        if (cleanSubVer != "/LQX Core:0.16.0.5/") {
-            LogPrintf("%s - Disconnecting from obselete version (peer: %d)\n", __func__, pfrom->GetId());
-            Misbehaving(pfrom->GetId(), 100);
-	    pfrom->fDisconnect = true;
+	// Banned old versions
+        if (cleanSubVer == "/LQX Core:0.16.0.1/" ||
+            cleanSubVer == "/LQX Core:0.16.0.2/" ||
+            cleanSubVer == "/LQX Core:0.16.0.3/" ||
+            cleanSubVer == "/LQX Core:0.16.0.4/") {
+            LOCK(cs_main);
+            LogPrintf("%s - Disconnecting from old version (peer: %d)\n", __func__, pfrom->GetId());
+            Misbehaving(pfrom->GetId(), 100); // instantly ban
+            pfrom->fDisconnect = true;
             return true;
-        }
-        
+        }        
+
 	if (!vRecv.empty()) {
             vRecv >> nStartingHeight;
         }
