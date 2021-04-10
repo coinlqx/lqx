@@ -2101,6 +2101,7 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
     CAmount nFees = 0;
     CAmount nValueIn = 0;
     CAmount nValueOut = 0;
+    CAmount nAmountBurned = 0;
     int nInputs = 0;
     unsigned int nSigOps = 0;
     blockundo.vtxundo.reserve(block.vtx.size() - 1);
@@ -2189,6 +2190,10 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
 
             }
 
+        }
+        for (const CTxOut& tx_out : tx.vout) {
+            if (tx_out.scriptPubKey.IsUnspendable())
+                nAmountBurned += tx_out.nValue;
         }
 
         // GetTransactionSigOpCount counts 2 types of sigops:
@@ -2338,7 +2343,7 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
 
     // peercoin: track money supply and mint amount info
     pindex->nMint = nValueOut - nValueIn + nFees;
-    pindex->nMoneySupply = (pindex->pprev? pindex->pprev->nMoneySupply : 0) + nValueOut - nValueIn;
+    pindex->nMoneySupply = (pindex->pprev ? pindex->pprev->nMoneySupply : 0) + nValueOut - nValueIn - nAmountBurned;
     setCurrentSupply(pindex->nMoneySupply);
 
     if (!WriteUndoDataForBlock(blockundo, state, pindex, chainparams))
